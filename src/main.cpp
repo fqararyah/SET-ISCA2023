@@ -100,6 +100,8 @@ int main(int argc, char** argv){
 	// Rounds of SA = urounds * #layers
 	int urounds = 100;
 
+	int rel_dram_bw = 1;
+
 #ifndef NOT_GEN_IR
 	// Whether generate IR or not.
 	bool gen_IR = true;
@@ -113,9 +115,9 @@ int main(int argc, char** argv){
 			if(config_file == "--args"){
 				config_file.clear();
 #ifndef NOT_GEN_IR
-				constexpr int arg_num = 11;
+				constexpr int arg_num = 12;
 #else
-				constexpr int arg_num = 10;
+				constexpr int arg_num = 11;
 #endif
 				if(argc != arg_num + 2){
 					std::cout << "Should have " << arg_num << " args!" << std::endl;
@@ -131,6 +133,7 @@ int main(int argc, char** argv){
 				y_len = std::stoi(argv[++i]);
 				stride = std::stoi(argv[++i]);
 				noc_bw = std::stoi(argv[++i]);
+				rel_dram_bw = std::stoi(argv[++i]);
 				cf_param = std::stoi(argv[++i]);
 				urounds = std::stoi(argv[++i]);
 #ifndef NOT_GEN_IR
@@ -191,7 +194,6 @@ int main(int argc, char** argv){
 	Cluster::min_util = 0.75;
 	ofm_ubuf_vol = 10 KB;
 	// 0.5 (GB/s)/TOPS
-	double rel_dram_bw = 0.5;
 
 	// NoC and DRAM energy
 	NoC::DRAM_acc_cost = 7.5 * 8;
@@ -457,7 +459,7 @@ int main(int argc, char** argv){
 static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cMapper){
 	Core::numMac_t LR_mac_num = 64;
 	energy_t LR_mac_cost = 0.0873; //IEEE FP16
-
+	// NVDLA style of 1024 MAC units using polar
 	if(core_type == "polar"){
 		PolarCore::PESetting pPE(8,8,0.018);
 		PolarCore::Bus pBus(4,4,0.018,16);
