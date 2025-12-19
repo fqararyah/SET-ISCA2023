@@ -13,6 +13,7 @@
 
 LayerEngine* SchNode::layerMapper=nullptr;
 len_t SchNode::tot_batch=0;
+double SchNode::frequency = 0;
 
 SchNode::sn_ptr SchNode::newNode(LTreeNode* _node, const Cluster& _c, Cut* parent){
 	switch (_node->get_type()) {
@@ -113,7 +114,7 @@ void SchNode::print_summary(std::ostream& os) const{
 	os << "mac_energy: " << mac_energy << std::endl;
 	os << "noc_energy: " << noc.get_hop_cost() << std::endl;
 	os << "DRAM_energy: " << noc.get_DRAM_cost() << std::endl;
-	os << "NoC & DRAM latency bound: " << noc.get_time() << std::endl;
+	os << "NoC & DRAM latency bound: " << noc.get_time() / frequency << std::endl;
 
 	energy_t e = cost.energy;
 	e -= ubuf_energy + buf_energy + bus_energy + mac_energy + noc.get_cost();
@@ -152,7 +153,9 @@ bool LNode::search(){
 	ubuf_energy = res.extUbufEnergy;
 	place_sch = std::move(res.place);
 	tileSch = res.tileSch;
+	tileSch.cost.time/=frequency;
 	cost = res.totCost;
+	cost.time /=frequency;
 
 	return true;
 }
@@ -210,7 +213,7 @@ void LNode::searchLayer(){
 	// For each segment, also bound NoC & DRAM time
 	bool is_seg = (parent == nullptr) || parent->is_DRAM_cut();
 	if(is_seg){
-		cycle_t noc_time = noc.get_time();
+		cycle_t noc_time = noc.get_time() / frequency;
 		cost.time = MAX(cost.time, noc_time);
 	}
 }
@@ -512,7 +515,7 @@ void TCut::construct(LTreeNode* node){
 
 	// For each segment, also bound NoC & DRAM time
 	if(is_seg){
-		cycle_t noc_time = noc.get_time();
+		cycle_t noc_time = noc.get_time() / frequency;
 		cost.time = MAX(cost.time, noc_time);
 	}
 }
@@ -624,7 +627,7 @@ void SCut::construct(LTreeNode* node){
 
 	// For each segment, also bound NoC & DRAM time
 	if(is_seg){
-		cycle_t noc_time = noc.get_time();
+		cycle_t noc_time = noc.get_time() / frequency;
 		cost.time = MAX(cost.time, noc_time);
 	}
 }

@@ -46,7 +46,7 @@ static const std::unordered_map<std::string, const Network*> All_Networks = {
 #define KB *1024
 
 // Core-related hardware parameters defined in this function.
-static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cMapper);
+static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cMapper, double power_factor);
 
 int main(int argc, char** argv){
 	unsigned seed = std::time(nullptr);
@@ -101,6 +101,10 @@ int main(int argc, char** argv){
 	int urounds = 100;
 
 	int rel_dram_bw = 1;
+	
+	double power_factor = 1.0;
+	SchNode::frequency = 1;//GHz
+	int tech = 12;
 
 #ifndef NOT_GEN_IR
 	// Whether generate IR or not.
@@ -115,9 +119,9 @@ int main(int argc, char** argv){
 			if(config_file == "--args"){
 				config_file.clear();
 #ifndef NOT_GEN_IR
-				constexpr int arg_num = 12;
+				constexpr int arg_num = 13;
 #else
-				constexpr int arg_num = 11;
+				constexpr int arg_num = 12;
 #endif
 				if(argc != arg_num + 2){
 					std::cout << "Should have " << arg_num << " args!" << std::endl;
@@ -136,6 +140,7 @@ int main(int argc, char** argv){
 				rel_dram_bw = std::stoi(argv[++i]);
 				cf_param = std::stoi(argv[++i]);
 				urounds = std::stoi(argv[++i]);
+				tech = std::stoi(argv[++i]);
 #ifndef NOT_GEN_IR
 				gen_IR = (std::stoi(argv[++i]) != 0);
 #endif
@@ -189,6 +194,13 @@ int main(int argc, char** argv){
 	}
 	if(!exp_name.empty()) exp_name += "_";
 
+	//double scale_factor = 0;
+	if(tech == 7){
+		//scale_factor = 0.7;
+		power_factor = 0.7;
+		SchNode::frequency = 1.3;//GHz
+	}
+
 	// Other parameters
 
 	Cluster::min_util = 0.75;
@@ -197,7 +209,7 @@ int main(int argc, char** argv){
 
 	// NoC and DRAM energy
 	NoC::DRAM_acc_cost = 7.5 * 8;
-	NoC::hop_cost = 0.7 * 8;
+	NoC::hop_cost = 0.7 * 8 * power_factor;
 
 	// Sets DRAM ports
 	NoC::dram_list.resize(2 * y_len);
@@ -209,7 +221,7 @@ int main(int argc, char** argv){
 	// Core/LayerEngine initialization
 	Core* core;
 	CoreMapper* cMapper;
-	init_core(core_type, core, cMapper);
+	init_core(core_type, core, cMapper, power_factor);
 	StdLayerEngine engine(cMapper);
 	SchNode::layerMapper = &engine;
 
@@ -456,9 +468,10 @@ int main(int argc, char** argv){
 	return 0;
 }
 
-static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cMapper){
+static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cMapper,
+double power_factor){
 	Core::numMac_t LR_mac_num = 64;
-	energy_t LR_mac_cost = 0.0873; //IEEE FP16
+	energy_t LR_mac_cost = 0.0873 * power_factor; //IEEE FP16
 	// NVDLA style of 1024 MAC units using polar
 	if(core_type == "polar"){
 		PolarCore::PESetting pPE(8,8,0.018);
@@ -474,20 +487,20 @@ static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cM
 		pBuf.ul3.Size = 1024 KB; //16 64-bit IO 64KB 1-port MBSRAM
 		pBuf.al2.Size = 0;
 
-		pBuf.al1.RCost = 0.0485625 * 8;
-		pBuf.al1.WCost = 0.0411625 * 8;
-		pBuf.wl1.RCost = 0.0381625 * 8; // emlpoy 2 4KB
-		pBuf.wl1.WCost = 0.0308875 * 8;
+		pBuf.al1.RCost = 0.0485625 * 8 * power_factor;
+		pBuf.al1.WCost = 0.0411625 * 8 * power_factor;
+		pBuf.wl1.RCost = 0.0381625 * 8 * power_factor ; // emlpoy 2 4KB
+		pBuf.wl1.WCost = 0.0308875 * 8 * power_factor;
 
-		pBuf.ol1.RCost = 0.0802 * 8;
-		pBuf.ol1.WCost = 0.0709 * 8;
-		pBuf.ol2.RCost = 0.07648125 * 8;
-		pBuf.ol2.WCost = 0.0989875 * 8;
-		pBuf.ul3.RCost = 0.1317125 * 8;
-		pBuf.ul3.WCost = 0.234025 * 8;
+		pBuf.ol1.RCost = 0.0802 * 8 * power_factor;
+		pBuf.ol1.WCost = 0.0709 * 8 * power_factor;
+		pBuf.ol2.RCost = 0.07648125 * 8 * power_factor;
+		pBuf.ol2.WCost = 0.0989875 * 8 * power_factor;
+		pBuf.ul3.RCost = 0.1317125 * 8 * power_factor;
+		pBuf.ul3.WCost = 0.234025 * 8 * power_factor;
 
-		pBuf.al2.RCost = pBuf.al2.WCost = 0;
-		pBuf.wl2.RCost = pBuf.wl2.WCost = 0;
+		pBuf.al2.RCost = pBuf.al2.WCost = 0 * power_factor;
+		pBuf.wl2.RCost = pBuf.wl2.WCost = 0 * power_factor;
 
 		PolarCore* p_core = new PolarCore(pPE, LR_mac_num, LR_mac_cost, pBus, pBuf);
 		core = p_core;
@@ -506,13 +519,13 @@ static void init_core(const std::string& core_type, Core*& core, CoreMapper*& cM
 		eBuf.wl1.Size = 128;
 		eBuf.ul2.Size = 1024 KB;
 
-		eBuf.al1.RCost = 0.0509 * 8; //8bit IO single port
-		eBuf.al1.WCost = 0.0506 * 8;//0.045;
-		eBuf.wl1.RCost = 0.0545 * 8; //Using 2 banks of 64
-		eBuf.wl1.WCost = 0.054 * 8;//0.090;
-		eBuf.pl1.RCost = eBuf.pl1.WCost = 0.0;
-		eBuf.ul2.RCost = 0.1317125 * 8;
-		eBuf.ul2.WCost = 0.234025 * 8;
+		eBuf.al1.RCost = 0.0509 * 8 * power_factor; //8bit IO single port
+		eBuf.al1.WCost = 0.0506 * 8 * power_factor;//0.045;
+		eBuf.wl1.RCost = 0.0545 * 8 * power_factor; //Using 2 banks of 64
+		eBuf.wl1.WCost = 0.054 * 8 * power_factor;//0.090;
+		eBuf.pl1.RCost = eBuf.pl1.WCost = 0.0 * power_factor;
+		eBuf.ul2.RCost = 0.1317125 * 8 * power_factor;
+		eBuf.ul2.WCost = 0.234025 * 8 * power_factor;
 
 		EyerissCore* e_core = new EyerissCore(s2, LR_mac_num, LR_mac_cost, eBus, eBuf);
 		core = e_core;

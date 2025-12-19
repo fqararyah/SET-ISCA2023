@@ -75,6 +75,7 @@ public:
 	static LayerEngine* layerMapper;
 	// The total batch size.
 	static len_t tot_batch;
+	static double frequency;
 
 protected:
 	bool valid;              // whether scheme is valid
