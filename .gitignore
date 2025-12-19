@@ -83,5 +83,4 @@ results/
 build/
 *.sh
 results*/
-*.py
 running/
