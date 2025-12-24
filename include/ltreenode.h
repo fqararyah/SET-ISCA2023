@@ -79,6 +79,11 @@ public:
 	LTreeNode(const LTreeNode& node)=default;
 	~LTreeNode();
 
+	//begin of edit: initialize tree from a string
+	// Parses a tree from the string output of print_tree
+	static LTreeNode* parse_tree(const std::string& tree_str);
+	//end of edit: initialize tree from a string
+
 	// Initialize the whole tree from the root.
 	void init_root();
 

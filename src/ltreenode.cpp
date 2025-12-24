@@ -1,5 +1,10 @@
 #include "ltreenode.h"
 
+//begin of edit: initialize tree from a string
+#include <sstream>
+#include <map>
+//end of edit: initialize tree from a string
+
 #include <cassert>
 
 #include "network.h"
@@ -276,3 +281,49 @@ void LTreeNode::traverse_pass2(){
 
 	if(t == NodeType::S) unit_time = (unit_time * (num_bgrp + num_stage)) / num_bgrp;
 }
+
+//begin of edit: initialize tree from a string
+// Parses a tree from the string output of print_tree
+LTreeNode* LTreeNode::parse_tree(const std::string& tree_str) {
+    std::map<std::string, lid_t> name_to_id;
+    for (lid_t i = 0; i < network->len(); ++i) {
+        name_to_id[network->getNode(i).name()] = i;
+    }
+
+    std::istringstream iss(tree_str);
+    std::string line;
+    std::vector<LTreeNode*> stack;
+    LTreeNode* root = nullptr;
+
+    while (std::getline(iss, line)) {
+        if (line.empty()) continue;
+        size_t depth = 0;
+        while (depth < line.size() && line[depth] == '\t') ++depth;
+        std::string content = line.substr(depth);
+        std::istringstream iss2(content);
+        std::string first;
+        iss2 >> first;
+        len_t num_batch;
+        while (stack.size() > depth) stack.pop_back();
+        LTreeNode* parent = stack.empty() ? nullptr : stack.back();
+        if (first == "T" || first == "S") {
+            char slash;
+            len_t num_bgrp;
+            iss2 >> num_batch >> slash >> num_bgrp;
+            NodeType type = (first == "S") ? NodeType::S : NodeType::T;
+            LTreeNode* node = new LTreeNode(Bitset(), num_batch, parent, type);
+            if (root == nullptr) root = node;
+            stack.push_back(node);
+        } else {
+            // leaf
+            iss2 >> num_batch;
+            lid_t lid = name_to_id.at(first);
+            LTreeNode* node = new LTreeNode(lid, num_batch, parent);
+            if (root == nullptr) root = node;
+            stack.push_back(node);
+        }
+    }
+    if (root) root->init_root();
+    return root;
+}
+//end of edit: initialize tree from a string
