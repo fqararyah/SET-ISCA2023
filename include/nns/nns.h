@@ -14,6 +14,15 @@ extern const Network resnet50;
 extern const Network resnet101;
 extern const Network resnet152;
 
+extern const Network resnetv2_50;
+extern const Network resnetv2_101;
+extern const Network resnetv2_152;
+
+extern const Network convnext_base;
+
+extern const Network vit_base;
+extern const Network deit_base;
+
 //extern Network vgg16;
 extern const Network vgg19;
 
@@ -36,6 +45,8 @@ extern const Network BERT_block;
 extern const Network GPT2_prefill_block;
 // extern const Network GPT2_decode;
 extern const Network GPT2_decode_block;
+extern const Network llama_prefill_block;
+extern const Network llama_decode_block;
 
 extern const Network PNASNet;
 

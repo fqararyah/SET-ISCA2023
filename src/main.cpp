@@ -29,6 +29,8 @@
 static const std::unordered_map<std::string, const Network *> All_Networks = {
 	{"resnet", &resnet50},
 	{"resnet101", &resnet101},
+	{"resnetv2", &resnetv2_50},
+	{"resnetv2_101", &resnetv2_101},
 	{"ires", &inception_resnet_v1},
 	{"goog", &googlenet},
 	{"dense", &densenet},
@@ -42,7 +44,13 @@ static const std::unordered_map<std::string, const Network *> All_Networks = {
 	{"pnas", &PNASNet},
 	{"bert", &BERT_block},
 	{"gpt_prefill", &GPT2_prefill_block},
-	{"gpt_decode", &GPT2_decode_block}};
+	{"gpt_decode", &GPT2_decode_block},
+	{"llama_prefill", &llama_prefill_block},
+	{"llama_decode", &llama_decode_block},
+	{"convnext", &convnext_base},
+	{"vit", &vit_base},
+	{"deit", &deit_base}
+};
 
 #define KB *1024
 

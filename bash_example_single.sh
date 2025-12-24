@@ -22,17 +22,18 @@ rounds=10              # number of rounds
 gen_IR=0              # generate IR? (0/1)
 tech=7
 
-test_custom_only=1
+test_custom_only=0
 run_init=1
 run_ls=1
 run_lp=1
 run_set=1
-run_custom=1
+run_custom=0
 if [ "$test_custom_only" -eq 1 ]; then
     run_init=0
     run_ls=0
     run_lp=0
     run_set=0
+    run_custom=1
 fi
 
 custom_tree_file="bash_exp_init_tree.txt"

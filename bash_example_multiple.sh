@@ -37,19 +37,25 @@ fi
 
 nets=(
 "resnet"
-"resnet101"
-"ires"
-"goog"
-"dense"
-"darknet"
-"vgg"
 "trans"
-"trans_cell"
-"pnas"
 "bert"
-"gpt_prefill"
-"gpt_decode"
 )
+
+# nets=(
+# "resnet"
+# "resnet101"
+# "ires"
+# "goog"
+# "dense"
+# "darknet"
+# "vgg"
+# "trans"
+# "trans_cell"
+# "pnas"
+# "bert"
+# "gpt_prefill"
+# "gpt_decode"
+# )
 
 ##############################
 # Batch sizes to sweep
@@ -61,8 +67,8 @@ batches=(1 8 64)
 # NoC + DRAM sweep sets
 ##############################
 
-noc_bws=(64) #(8 16 24 32 64)
-rel_dram_bws=(2) #(1 2 4)
+noc_bws=(32 64 128)
+rel_dram_bws=(1 2 4)
 
 ########################################
 # Derive metric name from cost code
