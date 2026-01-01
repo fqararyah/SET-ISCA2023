@@ -9,6 +9,8 @@ def extract_values(filepath):
     values = {
         'Energy': None,
         'mac_energy': None,
+        'buf_energy': None,
+        'ubuf_energy': None,
         'noc_energy': None,
         'DRAM_energy': None
     }
@@ -37,17 +39,23 @@ def main():
                     continue  # Skip if any value is missing
                 # Calculate ratios
                 energy = vals['Energy']
-                mac_ratio = vals['mac_energy'] / energy if energy else 0
-                noc_ratio = vals['noc_energy'] / energy if energy else 0
-                dram_ratio = vals['DRAM_energy'] / energy if energy else 0
+                mac_ratio = "{:.2f}".format(vals['mac_energy'] / energy if energy else 0)
+                buf_ratio = "{:.2f}".format(vals['buf_energy'] / energy if energy else 0)
+                ubuf_ratio = "{:.2f}".format(vals['ubuf_energy'] / energy if energy else 0)
+                noc_ratio = "{:.2f}".format(vals['noc_energy'] / energy if energy else 0)
+                dram_ratio = "{:.2f}".format(vals['DRAM_energy'] / energy if energy else 0)
                 # Get path parts for row index
                 path_parts = get_relative_parts(full_path)
                 row = path_parts + [
                     vals['Energy'],
                     vals['mac_energy'],
+                    vals['buf_energy'],
+                    vals['ubuf_energy'],
                     vals['noc_energy'],
                     vals['DRAM_energy'],
                     mac_ratio,
+                    buf_ratio,
+                    ubuf_ratio,
                     noc_ratio,
                     dram_ratio
                 ]
@@ -57,8 +65,8 @@ def main():
     max_path_cols = max(len(r) - 7 for r in rows) if rows else 0
     path_headers = [f'level_{i+1}' for i in range(max_path_cols)]
     headers = path_headers + [
-        'Energy', 'mac_energy', 'noc_energy', 'DRAM_energy',
-        'mac_energy/Energy', 'noc_energy/Energy', 'DRAM_energy/Energy'
+        'Energy', 'mac_energy', 'buf_energy', 'ubuf_energy', 'noc_energy', 'DRAM_energy',
+        'mac_energy/Energy', 'buf_energy/Energy', 'ubuf_energy/Energy', 'noc_energy/Energy', 'DRAM_energy/Energy'
     ]
 
     # Pad path columns for rows with fewer levels

@@ -7,8 +7,8 @@
 exp="bash_exp"          # experiment name used in file names
 core="polar"            # core architecture
 
-x=4                     # mesh X dimension
-y=4                     # mesh Y dimension
+x=8                     # mesh X dimension
+y=8                     # mesh Y dimension
 stride=2                # must divide x
 
 cost=-1                  # -1 energy, 0 latency, 1 edp
@@ -22,13 +22,13 @@ run_ls=1
 run_lp=1
 run_set=1
 run_custom=0
+custom_tree_file=""
 if [ "$test_custom_only" -eq 1 ]; then
     run_init=0
     run_ls=0
     run_lp=0
     run_set=0
-
-custom_tree_file=""
+    custom_tree_file="" #add here ...
 fi
 
 ##############################
@@ -36,9 +36,13 @@ fi
 ##############################
 
 nets=(
-"resnet"
-"trans"
+"gpt_prefill"
+"gpt_decode"
 "bert"
+"vit"
+"deit"
+"resnetv2"
+"convnext"
 )
 
 # nets=(
@@ -54,6 +58,9 @@ nets=(
 # "pnas"
 # "bert"
 # "gpt_prefill"
+# "gpt_decode"
+# "resnetv2"
+# "vit"
 # "gpt_decode"
 # )
 

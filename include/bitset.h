@@ -26,7 +26,7 @@
 #define FOR_BITSET(var, set) for(Bitset::bitlen_t var = set.first(); var != set.size(); var = set.next(var))
 
 // Maximal number of bits in the bitset. (must be representable by bitlen_t)
-#define MAX_BITS_IN_BS 640
+#define MAX_BITS_IN_BS 4096
 
 // Wrapper for std::bitset
 class Bitset: private std::bitset<MAX_BITS_IN_BS>{
